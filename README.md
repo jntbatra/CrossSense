@@ -90,6 +90,27 @@ signal and inflate the score, so the harness scores only people unseen in
 training and reports Accuracy / macro-F1 / ROC-AUC. It requires ≥2 subjects per
 split — the 2-subject sample data is intentionally rejected.
 
+### Generalisation result (UCI HAR, public dataset)
+
+To validate the method on real multi-subject data, the same cross-attention model
+is applied to a *different* cross-modal pairing task on the public
+[UCI HAR](https://archive.ics.uci.edu/dataset/240) dataset: decide whether an
+**accelerometer** stream and a **gyroscope** stream came from the same person.
+30 subjects, scored **subject-disjoint** (test people unseen in training):
+
+| Metric | Score |
+|---|---|
+| Accuracy | **0.811** |
+| Macro-F1 | **0.810** |
+| ROC-AUC | **0.872** |
+
+*(9 held-out subjects, 6,038 test pairs, 12 epochs. Reproduce:
+`python scripts/har_benchmark.py --zip <har.zip>`.)*
+
+> ⚠️ This is a **generalisation demo on UCI HAR (accel↔gyro)** — it is **not** the
+> plantar-pressure / 2D-pose benchmark, which is still pending the full released
+> dataset. Do not cite these numbers as the insole/pose result.
+
 ## Legacy baseline (`codes/`)
 
 The original TensorFlow method is preserved unchanged. See `codes/requirements-legacy.txt`
