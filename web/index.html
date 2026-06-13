@@ -83,10 +83,19 @@ flowchart LR
 </div></section>
 
 <section><div class="wrap">
-  <h2>Status &amp; honest metrics</h2>
-  <p class="note">No benchmark metrics yet. The model and full pipeline are verified end-to-end;
-     the figure below is a <b>synthetic smoke test for sanity only</b> — not a benchmark. Real metrics
-     require training on the full labeled insole/pose dataset.</p>
+  <h2>Results</h2>
+  <p>Validated on real multi-subject data via a <b>different</b> cross-modal pairing task on the
+     public <a href="https://archive.ics.uci.edu/dataset/240">UCI HAR</a> dataset
+     (accelerometer ↔ gyroscope, same-person?). 30 subjects, scored <b>subject-disjoint</b> —
+     test people are never seen in training.</p>
+  <div class="grid">
+    <div class="stat"><b>0.811</b><span>Accuracy</span></div>
+    <div class="stat"><b>0.810</b><span>Macro-F1</span></div>
+    <div class="stat"><b>0.872</b><span>ROC-AUC</span></div>
+  </div>
+  <p class="note">⚠️ This is a <b>generalisation demo on UCI HAR (accel↔gyro)</b> — <b>not</b> the
+     plantar-pressure / 2D-pose benchmark, which is pending the full released dataset. The synthetic
+     curve below is a CI sanity check only, not a benchmark.</p>
   <figure>
     <img src="assets/training_curve.png" alt="Synthetic smoke-test curve" />
     <figcaption>Synthetic smoke-test learning curve (sanity check, not a research result).</figcaption>
