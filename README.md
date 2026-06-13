@@ -62,6 +62,10 @@ python src/train.py --data-dir sample-test-data --epochs 30
 python src/infer.py --ckpt model/cross_attn.pt \
     --insole sample-test-data/smart-insole-A.csv \
     --openpose sample-test-data/open-pose-1.csv
+
+# Honest benchmark: held-out (subject-disjoint) Accuracy / F1 / ROC-AUC
+# Needs the full multi-subject dataset; refuses the 2-subject sample.
+python src/evaluate.py --data-dir <full_dataset> --epochs 40 --test-frac 0.3
 ```
 
 Data format: insole CSVs carry 8 pressure channels
@@ -79,6 +83,12 @@ python scripts/make_figures.py
 
 > The synthetic generator and the curve above are for development/CI sanity only
 > — they are **not** a benchmark or research result.
+
+**Benchmarking protocol.** Real metrics come from `src/evaluate.py`, which holds
+out *whole subjects* for the test set. A random split would leak per-subject
+signal and inflate the score, so the harness scores only people unseen in
+training and reports Accuracy / macro-F1 / ROC-AUC. It requires ≥2 subjects per
+split — the 2-subject sample data is intentionally rejected.
 
 ## Legacy baseline (`codes/`)
 
