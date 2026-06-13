@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PressPose — Cross-Modal Pairing of Plantar Pressure & 2D Pose</title>
+<style>
+  :root { --bg:#0d1117; --card:#161b22; --line:#30363d; --fg:#e6edf3; --muted:#9da7b3; --accent:#3b7dd8; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+         background:var(--bg); color:var(--fg); }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .wrap { max-width:880px; margin:0 auto; padding:0 20px; }
+  header { padding:72px 0 40px; text-align:center; border-bottom:1px solid var(--line); }
+  h1 { font-size:2.6rem; margin:0 0 12px; letter-spacing:-.5px; }
+  .tag { color:var(--muted); font-size:1.15rem; max-width:640px; margin:0 auto 24px; }
+  .btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn { border:1px solid var(--line); background:var(--card); color:var(--fg);
+         padding:10px 18px; border-radius:8px; font-weight:600; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); }
+  section { padding:44px 0; border-bottom:1px solid var(--line); }
+  h2 { font-size:1.5rem; margin:0 0 16px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; text-align:center; }
+  .stat b { display:block; font-size:1.7rem; color:var(--accent); }
+  .stat span { color:var(--muted); font-size:.9rem; }
+  figure { margin:18px 0; }
+  img { max-width:100%; border:1px solid var(--line); border-radius:10px; background:#fff; }
+  figcaption { color:var(--muted); font-size:.88rem; margin-top:8px; text-align:center; }
+  .mermaid { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px; }
+  .note { background:#1c2230; border:1px solid var(--line); border-left:3px solid var(--accent);
+          padding:12px 16px; border-radius:6px; color:var(--muted); font-size:.92rem; }
+  table { width:100%; border-collapse:collapse; }
+  td,th { border:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+  th { background:var(--card); }
+  footer { padding:32px 0; color:var(--muted); font-size:.9rem; text-align:center; }
+  code { background:var(--card); padding:2px 6px; border-radius:4px; font-size:.9em; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>PressPose</h1>
+    <p class="tag">Attentive cross-modal pairing of <b>plantar-pressure</b> and <b>2D-pose</b> streams —
+       deciding whether an insole signal and a skeleton belong to the <i>same person</i>, for social-robot HRI.</p>
+    <div class="btns">
+      <a class="btn primary" href="https://github.com/jntbatra/PressPose">GitHub repo →</a>
+      <a class="btn" href="https://github.com/jntbatra/PressPose#readme">Docs</a>
+    </div>
+  </div>
+</header>
+
+<section><div class="wrap">
+  <h2>The idea</h2>
+  <p>The original baseline rendered raw sensor numbers into 32×32 images so a frozen
+     <b>VGG16 + LSTM</b> could read them — heavyweight and ImageNet-dependent. PressPose drops that
+     entirely and learns <b>cross-attention directly on the raw signals</b>: each modality is encoded
+     by a small Transformer over time, then the insole and skeleton streams attend to each other before
+     a pairing head.</p>
+  <div class="grid">
+    <div class="stat"><b>185K</b><span>parameters</span></div>
+    <div class="stat"><b>~79×</b><span>smaller than VGG16 backbone</span></div>
+    <div class="stat"><b>0</b><span>ImageNet dependency</span></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Architecture</h2>
+  <pre class="mermaid">
+flowchart LR
+    A["Insole pressure<br/>T x 8"] --> EA["Modality Encoder<br/>(Transformer)"]
+    B["Skeleton joints<br/>T x 12"] --> EB["Modality Encoder<br/>(Transformer)"]
+    EA --> X["Cross-attention<br/>insole &harr; skeleton"]
+    EB --> X
+    X --> P["Mean pool + MLP head"]
+    P --> O{{"PAIRED / UNPAIRED"}}
+  </pre>
+  <figure>
+    <img src="assets/model_size.png" alt="Model size comparison" />
+    <figcaption>Parameter count vs the VGG16 backbone the baseline depends on.</figcaption>
+  </figure>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Status &amp; honest metrics</h2>
+  <p class="note">No benchmark metrics yet. The model and full pipeline are verified end-to-end;
+     the figure below is a <b>synthetic smoke test for sanity only</b> — not a benchmark. Real metrics
+     require training on the full labeled insole/pose dataset.</p>
+  <figure>
+    <img src="assets/training_curve.png" alt="Synthetic smoke-test curve" />
+    <figcaption>Synthetic smoke-test learning curve (sanity check, not a research result).</figcaption>
+  </figure>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Stack</h2>
+  <table>
+    <tr><th>Model</th><td>PyTorch — Transformer encoders + multi-head cross-attention</td></tr>
+    <tr><th>Data</th><td>Smart-insole pressure (8 ch) + OpenPose 2D lower-body joints; time-aligned, windowed</td></tr>
+    <tr><th>Tooling</th><td>NumPy, Pandas, Matplotlib</td></tr>
+    <tr><th>Baseline</th><td>Original TensorFlow VGG16+LSTM (preserved in <code>codes/</code>)</td></tr>
+  </table>
+</div></section>
+
+<footer><div class="wrap">
+  Original method &amp; baseline: Sevendi Eldrige Rifki Poluan (2022). ·
+  Contributors: Jayant Batra, Harshita Narula. ·
+  <a href="https://github.com/jntbatra/PressPose">github.com/jntbatra/PressPose</a>
+</div></footer>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad:true, theme:'dark' });
+</script>
+</body>
+</html>
