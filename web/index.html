@@ -104,8 +104,9 @@ flowchart LR
 <section><div class="wrap">
   <h2>Stack</h2>
   <table>
-    <tr><th>Model</th><td>PyTorch — Transformer encoders + multi-head cross-attention</td></tr>
-    <tr><th>Data</th><td>Smart-insole pressure (8 ch) + OpenPose 2D lower-body joints; time-aligned, windowed</td></tr>
+    <tr><th>Model</th><td>PyTorch — Transformer encoders + multi-head cross-attention (~185K params)</td></tr>
+    <tr><th>Benchmarked on</th><td>UCI HAR — accelerometer ↔ gyroscope, 30 subjects, subject-disjoint</td></tr>
+    <tr><th>Original application</th><td>Smart-insole pressure (8 ch) ↔ OpenPose 2D pose; on-task benchmark pending full dataset</td></tr>
     <tr><th>Tooling</th><td>NumPy, Pandas, Matplotlib</td></tr>
     <tr><th>Baseline</th><td>Original TensorFlow VGG16+LSTM (preserved in <code>codes/</code>)</td></tr>
   </table>
