@@ -1,9 +1,10 @@
-matplotlib==3.5.1
-numpy==1.22.2
-opencv-contrib-python==4.5.5.62
-pandas==1.4.1
-Pillow==9.0.1
-scikit-image==0.19.2
-scipy==1.8.0
-seaborn==0.11.2
-tensorflow
+# Cross-modal attention pipeline (src/). Python 3.10+
+#
+# GPU note (RTX 5060 / Blackwell, sm_120): install the CUDA 12.8 build of
+# torch instead of the default wheel:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+torch>=2.2
+numpy>=1.24
+pandas>=2.0
+
+# Legacy TensorFlow baseline (codes/) deps are listed in codes/requirements-legacy.txt

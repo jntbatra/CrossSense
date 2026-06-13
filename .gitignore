@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Trained artifacts (regenerate via training)
+model/cross_attn.pt
+*.pt
+*.h5
+*.hdf5
+*.ckpt
+
+# Data dumps / pickles
+*.pkl
+*.pickle
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
