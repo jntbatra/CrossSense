@@ -61,8 +61,13 @@ def load_aligned(insole_csv, openpose_csv, seq_len=10):
 
 def _normalise(seqs):
     x = np.stack(seqs)
-    mu, sd = x.mean((0, 1), keepdims=True), x.std((0, 1), keepdims=True) + 1e-6
-    return [(s - mu[0]) / sd[0] for s in seqs]
+    mu = x.mean((0, 1), keepdims=True)
+    # Floor the std: constant channels (std~0) would otherwise blow up to inf
+    # and propagate NaNs through attention.
+    sd = np.maximum(x.std((0, 1), keepdims=True), 1e-2)
+    out = [(s - mu[0]) / sd[0] for s in seqs]
+    return [np.nan_to_num(o, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32)
+            for o in out]
 
 
 class PairDataset(Dataset):
@@ -104,12 +109,14 @@ class PairDataset(Dataset):
                 torch.tensor(label, dtype=torch.long))
 
 
-def real_pairs(data_dir, seq_len=10):
-    """Build a PairDataset from CSVs in `data_dir`.
+def load_people(data_dir, seq_len=10):
+    """Load per-subject aligned, normalised sequences from CSVs in `data_dir`.
 
     Convention: smart-insole-<X>.csv pairs with open-pose-<X>.csv. When file
     stems don't line up one-to-one, all insole files share the available
     openpose files (best-effort) -- intended for the full released dataset.
+
+    Returns dict: subject name -> (insole_seqs, skel_seqs).
     """
     insole_files = sorted(glob.glob(os.path.join(data_dir, "smart-insole-*.csv")))
     op_files = sorted(glob.glob(os.path.join(data_dir, "open-pose-*.csv")))
@@ -123,7 +130,12 @@ def real_pairs(data_dir, seq_len=10):
         ins, skel = load_aligned(icsv, ocsv, seq_len)
         if ins:
             people[name] = (_normalise(ins), _normalise(skel))
-    return PairDataset(people)
+    return people
+
+
+def real_pairs(data_dir, seq_len=10):
+    """Build a single PairDataset from all subjects in `data_dir`."""
+    return PairDataset(load_people(data_dir, seq_len))
 
 
 class SyntheticPairs(Dataset):

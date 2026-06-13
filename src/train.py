@@ -31,6 +31,7 @@ def run_epoch(model, loader, device, optim=None):
             if train:
                 optim.zero_grad()
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
                 optim.step()
         loss_sum += loss.item() * label.size(0)
         correct += (logits.argmax(1) == label).sum().item()
